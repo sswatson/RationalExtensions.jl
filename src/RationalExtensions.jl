@@ -4,13 +4,18 @@ import Base.convert,
        Base.promote_rule,
        Base.show,
        Base.norm,
-       Base.conj
+       Base.conj,
+       Base.*,
+       Base.//,
+       Base./,
+       Base.+,
+       Base.-
 
 export Rad,
        Sqrt,
        RatOrInt
 
-RatOrInt = Union(Rational,Integer)
+RatOrInt = Union{Rational,Integer}
 
 immutable Rad{S<:RatOrInt,T<:Integer} <: Real
     a::S
@@ -43,7 +48,7 @@ Rad{S<:RatOrInt,T<:Integer}(a::S,b::S,r::Rational{T}) = Rad(zero(b),b//den(r),nu
 Sqrt{T<:Integer}(n::T) = Rad{T,T}(zero(n),one(n),n)
 Sqrt(r::Rational) = Rad(0,1,r)
 Sqrt(x::Rad) = (x.n == 1 ? Sqrt(b(x)) : throw(InexactError()))
-Sqrt(x::FloatingPoint) = sqrt(x)
+Sqrt(x::AbstractFloat) = sqrt(x)
 
 function *(x::Rad,y::Rad) 
     if x.n == y.n 
@@ -69,17 +74,6 @@ function //(x::Rad,y::Rad)
         error("Division with different radicands not supported")
     end
 end
-
-#=
-function //(x::Rad,y::Rad)
-    if x.n == y.n || x.b == 0 || y.b == 0
-        return Rad((x.a * y.a - x.b * y.b * x.n)//(y.a^2 - y.b^2 * x.n),
-                   (x.b * y.a - x.a * y.b)//(y.a^2 - y.b^2 * x.n), x.n)
-    else
-        error("Division with different radicands not supported")
-    end
-end
-=#
 
 //{T<:RatOrInt}(x::T,y::Rad) = Rad(x,zero(x),one(x)) // y
 //{T<:RatOrInt}(x::Rad,y::T) = Rad(x.a//y, x.b//y,x.n)
@@ -114,11 +108,11 @@ end
 
 convert{S<:RatOrInt,T<:Integer}(::Type{Rad{S,T}},n::Integer) = Rad(n,zero(n),one(n))
 convert{S<:RatOrInt,T<:Integer}(::Type{Rad{S,T}},r::Rational) = Rad(r,zero(r),one(r))
-convert(::Type{FloatingPoint}, x::Rad) = float(x.a) + float(x.b) * sqrt(x.n)
+convert(::Type{AbstractFloat}, x::Rad) = float(x.a) + float(x.b) * sqrt(x.n)
 
 convert{S,T}(::Type{BigFloat},x::Rad{S,T}) = big(x.a) + big(x.b)*sqrt(big(x.n))
 
-convert{S<:FloatingPoint,T,U}(::Type{S},x::Rad{T,U}) = 
+convert{S<:AbstractFloat,T,U}(::Type{S},x::Rad{T,U}) = 
     ((a,b,n) -> a + b*sqrt(n))(promote(x.a,x.b,x.n)...)
 
 convert(::Type{Bool},x::Rad) = (x.b != 0)
@@ -137,7 +131,7 @@ promote_rule{S<:RatOrInt,T<:Integer,U<:RatOrInt,V<:Integer}(::Type{Rad{S,T}},
 
 promote_rule{T<:Rad}(::Type{BigFloat},::Type{T}) = BigFloat
 
-promote_rule{S<:FloatingPoint,T<:Rad}(::Type{S},::Type{T}) = S
+promote_rule{S<:AbstractFloat,T<:Rad}(::Type{S},::Type{T}) = S
 
 convert(::Type{Rad}, x::Rad) = x
 
