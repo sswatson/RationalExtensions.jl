@@ -1,3 +1,5 @@
+__precompile__(true)
+
 module RationalExtensions
 
 import Base.convert,
@@ -10,6 +12,8 @@ import Base.convert,
        Base./,
        Base.+,
        Base.-
+
+import Primes
 
 export Rad,
        Sqrt,
@@ -27,7 +31,7 @@ immutable Rad{S<:RatOrInt,T<:Integer} <: Real
             return new(a,convert(S,0),convert(T,1))
         end
         sgn = sign(n)
-        d = factor(abs(n)) 
+        d = Primes.factor(abs(n)) 
         for p in keys(d)
             b *= p^div(d[p],2)
             d[p] = mod(d[p],2)
