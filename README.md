@@ -12,5 +12,5 @@ conj(1//3 - Sqrt(3))
 To install, run
 
 ```
-Pkg.clone("git://github.com/sswatson/RationalExtensions.jl.git")
+Pkg.add("RationalExtensions")
 ```
